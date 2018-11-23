@@ -3,8 +3,8 @@ package de.pauhull.uuidfetcher.bungee;
 import com.ikeirnez.pluginmessageframework.PacketHandler;
 import com.ikeirnez.pluginmessageframework.PacketListener;
 import de.pauhull.uuidfetcher.common.communication.packet.NameRequestPacket;
-import de.pauhull.uuidfetcher.common.communication.packet.UUIDRequestPacket;
 import de.pauhull.uuidfetcher.common.communication.packet.ReturnPacket;
+import de.pauhull.uuidfetcher.common.communication.packet.UUIDRequestPacket;
 
 /**
  * Created by Paul

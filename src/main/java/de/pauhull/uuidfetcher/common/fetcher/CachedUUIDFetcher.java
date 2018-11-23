@@ -54,7 +54,7 @@ public class CachedUUIDFetcher {
     public void fetchUUIDAsync(String playerName, Consumer<UUID> consumer) {
 
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerName);
-        if(player != null) {
+        if (player != null) {
             cache.save(player.getUniqueId(), player.getName());
             consumer.accept(player.getUniqueId());
             return;
@@ -105,7 +105,7 @@ public class CachedUUIDFetcher {
     public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
 
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid);
-        if(player != null) {
+        if (player != null) {
             cache.save(player.getUniqueId(), player.getName());
             consumer.accept(player.getName());
             return;
@@ -154,7 +154,7 @@ public class CachedUUIDFetcher {
     public void getNameCaseSensitive(String name, Consumer<String> consumer) {
 
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(name);
-        if(player != null) {
+        if (player != null) {
             cache.save(player.getUniqueId(), player.getName());
             consumer.accept(player.getName());
             return;

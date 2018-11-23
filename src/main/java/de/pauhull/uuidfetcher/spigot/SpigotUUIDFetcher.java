@@ -5,8 +5,8 @@ import com.ikeirnez.pluginmessageframework.PacketListener;
 import com.ikeirnez.pluginmessageframework.PacketManager;
 import com.ikeirnez.pluginmessageframework.implementations.BukkitPacketManager;
 import de.pauhull.uuidfetcher.common.communication.packet.NameRequestPacket;
-import de.pauhull.uuidfetcher.common.communication.packet.UUIDRequestPacket;
 import de.pauhull.uuidfetcher.common.communication.packet.ReturnPacket;
+import de.pauhull.uuidfetcher.common.communication.packet.UUIDRequestPacket;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -47,7 +47,7 @@ public class SpigotUUIDFetcher implements PacketListener {
         UUID uuid = packet.getUuid();
 
         if (requestedUUIDs.containsKey(player.toUpperCase())) {
-            for(Consumer<UUID> consumer : requestedUUIDs.get(player.toUpperCase())) {
+            for (Consumer<UUID> consumer : requestedUUIDs.get(player.toUpperCase())) {
                 consumer.accept(uuid);
             }
 
@@ -55,7 +55,7 @@ public class SpigotUUIDFetcher implements PacketListener {
         }
 
         if (requestedNames.containsKey(uuid)) {
-            for(Consumer<String> consumer : requestedNames.get(uuid)) {
+            for (Consumer<String> consumer : requestedNames.get(uuid)) {
                 consumer.accept(player);
             }
 
@@ -67,14 +67,14 @@ public class SpigotUUIDFetcher implements PacketListener {
     public void fetchUUIDAsync(String playerName, Consumer<UUID> consumer) {
 
         Player player = Bukkit.getPlayer(playerName);
-        if(player != null) {
+        if (player != null) {
             consumer.accept(player.getUniqueId());
             return;
         }
 
         packetManager.sendPacket(new UUIDRequestPacket(playerName));
 
-        if(requestedUUIDs.containsKey(playerName.toUpperCase())) {
+        if (requestedUUIDs.containsKey(playerName.toUpperCase())) {
             requestedUUIDs.get(playerName.toUpperCase()).add(consumer);
         } else {
             List<Consumer<UUID>> consumers = new ArrayList<>();
@@ -86,7 +86,7 @@ public class SpigotUUIDFetcher implements PacketListener {
     public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
 
         Player player = Bukkit.getPlayer(uuid);
-        if(player != null) {
+        if (player != null) {
             consumer.accept(player.getName());
             return;
         }
