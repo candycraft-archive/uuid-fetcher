@@ -6,7 +6,6 @@ import lombok.Getter;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Created by Paul
@@ -14,34 +13,34 @@ import java.util.UUID;
  *
  * @author pauhull
  */
-public class ReturnPacket extends StandardPacket {
+public class OnlineResponsePacket extends StandardPacket {
 
     @Getter
-    private UUID uuid;
+    private boolean online;
 
     @Getter
     private String player;
 
-    public ReturnPacket() {
-        this(UUID.randomUUID(), "");
+    public OnlineResponsePacket() {
+        this(null, false);
     }
 
-    public ReturnPacket(UUID uuid, String player) {
-        this.uuid = uuid;
+    public OnlineResponsePacket(String player, boolean online) {
         this.player = player;
+        this.online = online;
     }
 
     @Override
     public void handle(DataInputStream dataInputStream) throws IOException {
         String[] input = dataInputStream.readUTF().split(", ");
-        this.uuid = UUID.fromString(input[0]);
-        this.player = input[1];
+        this.player = input[0];
+        this.online = Boolean.valueOf(input[1]);
     }
 
     @Override
     public PacketWriter write() throws IOException {
         PacketWriter writer = new PacketWriter(this);
-        writer.writeUTF(uuid.toString() + ", " + player);
+        writer.writeUTF(player + ", " + online);
         return writer;
     }
 

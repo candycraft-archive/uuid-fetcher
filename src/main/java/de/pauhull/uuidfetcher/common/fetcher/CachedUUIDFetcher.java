@@ -5,8 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,47 +16,20 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-public class CachedUUIDFetcher {
+public class CachedUUIDFetcher implements UUIDFetcher {
 
     @Getter
     protected static UUIDCache cache = new UUIDCache();
 
+    @Getter
     protected ExecutorService executor;
 
     public CachedUUIDFetcher(ExecutorService executor) {
         this.executor = executor;
     }
 
-    public static UUID parseUUIDFromString(String uuidAsString) {
-        String[] parts = {
-                "0x" + uuidAsString.substring(0, 8),
-                "0x" + uuidAsString.substring(8, 12),
-                "0x" + uuidAsString.substring(12, 16),
-                "0x" + uuidAsString.substring(16, 20),
-                "0x" + uuidAsString.substring(20, 32)
-        };
-
-        long mostSigBits = Long.decode(parts[0]).longValue();
-        mostSigBits <<= 16;
-        mostSigBits |= Long.decode(parts[1]).longValue();
-        mostSigBits <<= 16;
-        mostSigBits |= Long.decode(parts[2]).longValue();
-
-        long leastSigBits = Long.decode(parts[3]).longValue();
-        leastSigBits <<= 48;
-        leastSigBits |= Long.decode(parts[4]).longValue();
-
-        return new UUID(mostSigBits, leastSigBits);
-    }
-
+    @Override
     public void fetchUUIDAsync(String playerName, Consumer<UUID> consumer) {
-
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerName);
-        if (player != null) {
-            cache.save(player.getUniqueId(), player.getName());
-            consumer.accept(player.getUniqueId());
-            return;
-        }
 
         executor.execute(() -> {
 
@@ -92,7 +63,7 @@ public class CachedUUIDFetcher {
                 bufferedReader.close();
 
                 // Return UUID
-                UUID result = parseUUIDFromString(uuidAsString);
+                UUID result = UUIDFetcher.parseUUIDFromString(uuidAsString);
                 cache.save(result, retrievedName);
                 consumer.accept(result);
             } catch (IOException e) {
@@ -102,14 +73,8 @@ public class CachedUUIDFetcher {
         });
     }
 
+    @Override
     public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
-
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid);
-        if (player != null) {
-            cache.save(player.getUniqueId(), player.getName());
-            consumer.accept(player.getName());
-            return;
-        }
 
         executor.execute(() -> {
 
@@ -151,14 +116,8 @@ public class CachedUUIDFetcher {
         });
     }
 
+    @Override
     public void getNameCaseSensitive(String name, Consumer<String> consumer) {
-
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(name);
-        if (player != null) {
-            cache.save(player.getUniqueId(), player.getName());
-            consumer.accept(player.getName());
-            return;
-        }
 
         fetchUUIDAsync(name, uuid -> {
             if (uuid == null) {

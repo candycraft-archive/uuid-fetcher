@@ -4,9 +4,8 @@ import com.ikeirnez.pluginmessageframework.PacketHandler;
 import com.ikeirnez.pluginmessageframework.PacketListener;
 import com.ikeirnez.pluginmessageframework.PacketManager;
 import com.ikeirnez.pluginmessageframework.implementations.BukkitPacketManager;
-import de.pauhull.uuidfetcher.common.communication.packet.NameRequestPacket;
-import de.pauhull.uuidfetcher.common.communication.packet.ReturnPacket;
-import de.pauhull.uuidfetcher.common.communication.packet.UUIDRequestPacket;
+import de.pauhull.uuidfetcher.common.communication.packet.*;
+import de.pauhull.uuidfetcher.common.fetcher.UUIDFetcher;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,7 +20,7 @@ import java.util.function.Consumer;
  *
  * @author pauhull
  */
-public class SpigotUUIDFetcher implements PacketListener {
+public class SpigotUUIDFetcher implements PacketListener, UUIDFetcher {
 
     @Getter
     private JavaPlugin plugin;
@@ -35,6 +34,9 @@ public class SpigotUUIDFetcher implements PacketListener {
     @Getter
     private Map<UUID, List<Consumer<String>>> requestedNames = new HashMap<>();
 
+    @Getter
+    private Map<String, List<Consumer<Boolean>>> requestedOnline = new HashMap<>();
+
     public SpigotUUIDFetcher(JavaPlugin plugin) {
         this.plugin = plugin;
         this.packetManager = new BukkitPacketManager(plugin, "UUIDFetcherChannel");
@@ -42,7 +44,21 @@ public class SpigotUUIDFetcher implements PacketListener {
     }
 
     @PacketHandler
-    public void onReturn(ReturnPacket packet) {
+    public void onOnlineResponse(OnlineResponsePacket packet) {
+        String player = packet.getPlayer();
+        boolean online = packet.isOnline();
+
+        if (requestedOnline.containsKey(player.toUpperCase())) {
+            for (Consumer<Boolean> consumer : requestedOnline.get(player.toUpperCase())) {
+                consumer.accept(online);
+            }
+
+            requestedOnline.remove(player.toUpperCase());
+        }
+    }
+
+    @PacketHandler
+    public void onResponse(ResponsePacket packet) {
         String player = packet.getPlayer();
         UUID uuid = packet.getUuid();
 
@@ -64,6 +80,7 @@ public class SpigotUUIDFetcher implements PacketListener {
 
     }
 
+    @Override
     public void fetchUUIDAsync(String playerName, Consumer<UUID> consumer) {
 
         Player player = Bukkit.getPlayer(playerName);
@@ -83,6 +100,7 @@ public class SpigotUUIDFetcher implements PacketListener {
         }
     }
 
+    @Override
     public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
 
         Player player = Bukkit.getPlayer(uuid);
@@ -102,6 +120,26 @@ public class SpigotUUIDFetcher implements PacketListener {
         }
     }
 
+    public void isOnlineAsync(String playerName, Consumer<Boolean> consumer) {
+
+        Player player = Bukkit.getPlayer(playerName);
+        if (player != null) {
+            consumer.accept(true);
+            return;
+        }
+
+        packetManager.sendPacket(new OnlineRequestPacket(playerName));
+
+        if (requestedOnline.containsKey(playerName.toUpperCase())) {
+            requestedOnline.get(playerName.toUpperCase()).add(consumer);
+        } else {
+            List<Consumer<Boolean>> consumers = new ArrayList<>();
+            consumers.add(consumer);
+            requestedOnline.put(playerName.toUpperCase(), consumers);
+        }
+    }
+
+    @Override
     public void getNameCaseSensitive(String name, Consumer<String> consumer) {
         fetchUUIDAsync(name, uuid -> fetchNameAsync(uuid, consumer));
     }
