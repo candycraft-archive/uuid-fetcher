@@ -1,10 +1,12 @@
 package de.pauhull.uuidfetcher.spigot;
 
-import com.ikeirnez.pluginmessageframework.PacketHandler;
-import com.ikeirnez.pluginmessageframework.PacketListener;
-import com.ikeirnez.pluginmessageframework.PacketManager;
-import com.ikeirnez.pluginmessageframework.implementations.BukkitPacketManager;
-import de.pauhull.uuidfetcher.common.communication.packet.*;
+import cloud.timo.TimoCloud.api.TimoCloudAPI;
+import cloud.timo.TimoCloud.api.messages.listeners.MessageListener;
+import cloud.timo.TimoCloud.api.messages.objects.AddressedPluginMessage;
+import cloud.timo.TimoCloud.api.messages.objects.PluginMessage;
+import de.pauhull.uuidfetcher.common.communication.message.NameRequestMessage;
+import de.pauhull.uuidfetcher.common.communication.message.ResponseMessage;
+import de.pauhull.uuidfetcher.common.communication.message.UUIDRequestMessage;
 import de.pauhull.uuidfetcher.common.fetcher.UUIDFetcher;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -20,13 +22,10 @@ import java.util.function.Consumer;
  *
  * @author pauhull
  */
-public class SpigotUUIDFetcher implements PacketListener, UUIDFetcher {
+public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
 
     @Getter
     private JavaPlugin plugin;
-
-    @Getter
-    private PacketManager packetManager;
 
     @Getter
     private Map<String, List<Consumer<UUID>>> requestedUUIDs = new HashMap<>();
@@ -34,50 +33,9 @@ public class SpigotUUIDFetcher implements PacketListener, UUIDFetcher {
     @Getter
     private Map<UUID, List<Consumer<String>>> requestedNames = new HashMap<>();
 
-    @Getter
-    private Map<String, List<Consumer<Boolean>>> requestedOnline = new HashMap<>();
-
     public SpigotUUIDFetcher(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.packetManager = new BukkitPacketManager(plugin, "UUIDFetcherChannel");
-        this.packetManager.registerListener(this);
-    }
-
-    @PacketHandler
-    public void onOnlineResponse(OnlineResponsePacket packet) {
-        String player = packet.getPlayer();
-        boolean online = packet.isOnline();
-
-        if (requestedOnline.containsKey(player.toUpperCase())) {
-            for (Consumer<Boolean> consumer : requestedOnline.get(player.toUpperCase())) {
-                consumer.accept(online);
-            }
-
-            requestedOnline.remove(player.toUpperCase());
-        }
-    }
-
-    @PacketHandler
-    public void onResponse(ResponsePacket packet) {
-        String player = packet.getPlayer();
-        UUID uuid = packet.getUuid();
-
-        if (requestedUUIDs.containsKey(player.toUpperCase())) {
-            for (Consumer<UUID> consumer : requestedUUIDs.get(player.toUpperCase())) {
-                consumer.accept(uuid);
-            }
-
-            requestedUUIDs.remove(player.toUpperCase());
-        }
-
-        if (requestedNames.containsKey(uuid)) {
-            for (Consumer<String> consumer : requestedNames.get(uuid)) {
-                consumer.accept(player);
-            }
-
-            requestedNames.remove(uuid);
-        }
-
+        TimoCloudAPI.getMessageAPI().registerMessageListener(this);
     }
 
     @Override
@@ -89,7 +47,8 @@ public class SpigotUUIDFetcher implements PacketListener, UUIDFetcher {
             return;
         }
 
-        packetManager.sendPacket(new UUIDRequestPacket(playerName));
+        UUIDRequestMessage requestMessage = new UUIDRequestMessage(playerName);
+        requestMessage.send("Proxy");
 
         if (requestedUUIDs.containsKey(playerName.toUpperCase())) {
             requestedUUIDs.get(playerName.toUpperCase()).add(consumer);
@@ -109,7 +68,8 @@ public class SpigotUUIDFetcher implements PacketListener, UUIDFetcher {
             return;
         }
 
-        packetManager.sendPacket(new NameRequestPacket(uuid));
+        NameRequestMessage requestMessage = new NameRequestMessage(uuid);
+        requestMessage.send("Proxy");
 
         if (requestedNames.containsKey(uuid)) {
             requestedNames.get(uuid).add(consumer);
@@ -120,28 +80,38 @@ public class SpigotUUIDFetcher implements PacketListener, UUIDFetcher {
         }
     }
 
-    public void isOnlineAsync(String playerName, Consumer<Boolean> consumer) {
-
-        Player player = Bukkit.getPlayer(playerName);
-        if (player != null) {
-            consumer.accept(true);
-            return;
-        }
-
-        packetManager.sendPacket(new OnlineRequestPacket(playerName));
-
-        if (requestedOnline.containsKey(playerName.toUpperCase())) {
-            requestedOnline.get(playerName.toUpperCase()).add(consumer);
-        } else {
-            List<Consumer<Boolean>> consumers = new ArrayList<>();
-            consumers.add(consumer);
-            requestedOnline.put(playerName.toUpperCase(), consumers);
-        }
-    }
-
     @Override
     public void getNameCaseSensitive(String name, Consumer<String> consumer) {
         fetchUUIDAsync(name, uuid -> fetchNameAsync(uuid, consumer));
+    }
+
+    @Override
+    public void onPluginMessage(AddressedPluginMessage addressedPluginMessage) {
+        PluginMessage message = addressedPluginMessage.getMessage();
+
+        if (message.getType().equals(ResponseMessage.TYPE)) {
+
+            ResponseMessage responseMessage = new ResponseMessage(message);
+            String player = responseMessage.getPlayerName();
+            UUID uuid = responseMessage.getUuid();
+
+            if (requestedUUIDs.containsKey(player.toUpperCase())) {
+                for (Consumer<UUID> consumer : requestedUUIDs.get(player.toUpperCase())) {
+                    consumer.accept(uuid);
+                }
+
+                requestedUUIDs.remove(player.toUpperCase());
+            }
+
+            if (requestedNames.containsKey(uuid)) {
+                for (Consumer<String> consumer : requestedNames.get(uuid)) {
+                    consumer.accept(player);
+                }
+
+                requestedNames.remove(uuid);
+            }
+
+        }
     }
 
 }

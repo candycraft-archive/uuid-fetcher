@@ -1,7 +1,5 @@
 package de.pauhull.uuidfetcher.bungee;
 
-import com.ikeirnez.pluginmessageframework.PacketManager;
-import com.ikeirnez.pluginmessageframework.implementations.BungeeCordPacketManager;
 import de.pauhull.uuidfetcher.common.fetcher.CachedUUIDFetcher;
 import de.pauhull.uuidfetcher.common.util.UUIDFetcherThreadFactory;
 import lombok.Getter;
@@ -22,9 +20,6 @@ public class UUIDFetcherBungeePlugin extends Plugin {
     private static UUIDFetcherBungeePlugin instance = null;
 
     @Getter
-    private PacketManager packetManager;
-
-    @Getter
     private ExecutorService executorService;
 
     @Getter
@@ -36,8 +31,7 @@ public class UUIDFetcherBungeePlugin extends Plugin {
 
         this.executorService = Executors.newSingleThreadExecutor(new UUIDFetcherThreadFactory());
         this.cachedUUIDFetcher = new CachedUUIDFetcher(executorService);
-        this.packetManager = new BungeeCordPacketManager(this, "UUIDFetcherChannel");
-        this.packetManager.registerListener(new BungeePacketHandler(this));
+        new BungeeMessageListener(this);
     }
 
     @Override
