@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.pauhull</groupId>
-    <artifactId>uuidfetcher</artifactId>
+    <artifactId>proxy-communication</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <repositories>
@@ -25,6 +25,7 @@
             <groupId>cloud.timo.TimoCloud</groupId>
             <artifactId>TimoCloud-API</artifactId>
             <version>5.2.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <!--Spigot-->
@@ -109,13 +110,6 @@
                             <outputDirectory>E:/Programmieren/Output/${project.artifactId}/${project.version}/
                             </outputDirectory>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.ikeirnez.pluginmessageframework</pattern>
-                                    <shadedPattern>com.ikeirnez.pluginmessageframework</shadedPattern>
-                                </relocation>
-                            </relocations>
                         </configuration>
 
                     </execution>

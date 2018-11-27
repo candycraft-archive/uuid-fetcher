@@ -12,7 +12,7 @@ import java.util.UUID;
  *
  * @author pauhull
  */
-public class NameRequestMessage extends PluginMessage {
+public class NameRequestMessage extends CommunicationMessage {
 
     public static final String TYPE = "NAME_REQUEST";
 
@@ -28,10 +28,6 @@ public class NameRequestMessage extends PluginMessage {
 
     public NameRequestMessage(PluginMessage pluginMessage) {
         this(UUID.fromString(pluginMessage.getString("uuid")));
-    }
-
-    public void send(String server) {
-        TimoCloudAPI.getMessageAPI().sendMessageToServer(this, server);
     }
 
 }

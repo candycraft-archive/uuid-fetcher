@@ -10,27 +10,27 @@ import lombok.Getter;
  *
  * @author pauhull
  */
-public class ConnectMessage extends CommunicationMessage {
+public class RunCommandMessage extends CommunicationMessage {
 
-    public static final String TYPE = "CONNECT";
+    public static final String TYPE = "RUN_COMMAND";
 
     @Getter
     private String playerName;
 
     @Getter
-    private String server;
+    private String command;
 
-    public ConnectMessage(String playerName, String server) {
+    public RunCommandMessage(String playerName, String command) {
         super(TYPE);
 
         this.playerName = playerName;
-        this.server = server;
+        this.command = command;
         this.set("playerName", playerName);
-        this.set("server", server);
+        this.set("command", command);
     }
 
-    public ConnectMessage(PluginMessage pluginMessage) {
-        this(pluginMessage.getString("playerName"), pluginMessage.getString("server"));
+    public RunCommandMessage(PluginMessage pluginMessage) {
+        this(pluginMessage.getString("playerName"), pluginMessage.getString("command"));
     }
 
 }

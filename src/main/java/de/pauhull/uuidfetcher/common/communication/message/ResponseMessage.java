@@ -12,7 +12,7 @@ import java.util.UUID;
  *
  * @author pauhull
  */
-public class ResponseMessage extends PluginMessage {
+public class ResponseMessage extends CommunicationMessage {
 
     public static final String TYPE = "RESPONSE";
 
@@ -27,17 +27,13 @@ public class ResponseMessage extends PluginMessage {
 
         this.playerName = playerName;
         this.uuid = uuid;
-        this.set("playerName", playerName);
-        this.set("uuid", uuid.toString());
+        this.set("playerName", playerName != null ? playerName : "null");
+        this.set("uuid", uuid != null ? uuid.toString() : "null");
     }
 
     public ResponseMessage(PluginMessage pluginMessage) {
         this(pluginMessage.getString("playerName"),
-                UUID.fromString(pluginMessage.getString("uuid")));
-    }
-
-    public void send(String server) {
-        TimoCloudAPI.getMessageAPI().sendMessageToServer(this, server);
+                pluginMessage.getString("uuid") != null ? UUID.fromString(pluginMessage.getString("uuid")) : null);
     }
 
 }

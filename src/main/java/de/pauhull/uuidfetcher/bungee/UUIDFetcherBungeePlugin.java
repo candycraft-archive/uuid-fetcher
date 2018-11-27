@@ -7,6 +7,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Created by Paul
@@ -23,13 +24,18 @@ public class UUIDFetcherBungeePlugin extends Plugin {
     private ExecutorService executorService;
 
     @Getter
+    private ScheduledExecutorService scheduledExecutorService;
+
+    @Getter
     private CachedUUIDFetcher cachedUUIDFetcher;
 
     @Override
     public void onEnable() {
         instance = this;
 
-        this.executorService = Executors.newSingleThreadExecutor(new UUIDFetcherThreadFactory());
+        UUIDFetcherThreadFactory threadFactory = new UUIDFetcherThreadFactory();
+        this.executorService = Executors.newSingleThreadExecutor(threadFactory);
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
         this.cachedUUIDFetcher = new CachedUUIDFetcher(executorService);
         new BungeeMessageListener(this);
     }
@@ -37,6 +43,7 @@ public class UUIDFetcherBungeePlugin extends Plugin {
     @Override
     public void onDisable() {
         this.executorService.shutdown();
+        this.scheduledExecutorService.shutdown();
     }
 
 }

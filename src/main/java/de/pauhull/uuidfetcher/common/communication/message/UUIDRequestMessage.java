@@ -10,7 +10,7 @@ import lombok.Getter;
  *
  * @author pauhull
  */
-public class UUIDRequestMessage extends PluginMessage {
+public class UUIDRequestMessage extends CommunicationMessage {
 
     public static final String TYPE = "UUID_REQUEST";
 
@@ -26,10 +26,6 @@ public class UUIDRequestMessage extends PluginMessage {
 
     public UUIDRequestMessage(PluginMessage pluginMessage) {
         this(pluginMessage.getString("playerName"));
-    }
-
-    public void send(String server) {
-        TimoCloudAPI.getMessageAPI().sendMessageToServer(this, server);
     }
 
 }

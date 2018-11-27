@@ -48,7 +48,7 @@ public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
         }
 
         UUIDRequestMessage requestMessage = new UUIDRequestMessage(playerName);
-        requestMessage.send("Proxy");
+        requestMessage.sendToProxy("Proxy");
 
         if (requestedUUIDs.containsKey(playerName.toUpperCase())) {
             requestedUUIDs.get(playerName.toUpperCase()).add(consumer);
@@ -69,7 +69,7 @@ public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
         }
 
         NameRequestMessage requestMessage = new NameRequestMessage(uuid);
-        requestMessage.send("Proxy");
+        requestMessage.sendToProxy("Proxy");
 
         if (requestedNames.containsKey(uuid)) {
             requestedNames.get(uuid).add(consumer);
@@ -95,7 +95,7 @@ public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
             String player = responseMessage.getPlayerName();
             UUID uuid = responseMessage.getUuid();
 
-            if (requestedUUIDs.containsKey(player.toUpperCase())) {
+            if (player != null && requestedUUIDs.containsKey(player.toUpperCase())) {
                 for (Consumer<UUID> consumer : requestedUUIDs.get(player.toUpperCase())) {
                     consumer.accept(uuid);
                 }
@@ -103,7 +103,7 @@ public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
                 requestedUUIDs.remove(player.toUpperCase());
             }
 
-            if (requestedNames.containsKey(uuid)) {
+            if (uuid != null && requestedNames.containsKey(uuid)) {
                 for (Consumer<String> consumer : requestedNames.get(uuid)) {
                     consumer.accept(player);
                 }

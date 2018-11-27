@@ -4,13 +4,12 @@ import cloud.timo.TimoCloud.api.TimoCloudAPI;
 import cloud.timo.TimoCloud.api.messages.listeners.MessageListener;
 import cloud.timo.TimoCloud.api.messages.objects.AddressedPluginMessage;
 import cloud.timo.TimoCloud.api.messages.objects.PluginMessage;
-import de.pauhull.uuidfetcher.common.communication.message.ConnectMessage;
-import de.pauhull.uuidfetcher.common.communication.message.NameRequestMessage;
-import de.pauhull.uuidfetcher.common.communication.message.ResponseMessage;
-import de.pauhull.uuidfetcher.common.communication.message.UUIDRequestMessage;
+import de.pauhull.uuidfetcher.common.communication.message.*;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Paul
@@ -24,7 +23,9 @@ public class BungeeMessageListener implements MessageListener {
 
     public BungeeMessageListener(UUIDFetcherBungeePlugin plugin) {
         this.plugin = plugin;
+
         TimoCloudAPI.getMessageAPI().registerMessageListener(this);
+
     }
 
     @Override
@@ -35,9 +36,16 @@ public class BungeeMessageListener implements MessageListener {
             UUIDRequestMessage requestMessage = new UUIDRequestMessage(message);
 
             plugin.getCachedUUIDFetcher().fetchUUIDAsync(requestMessage.getPlayerName(), uuid -> {
+
+                if(uuid == null) {
+                    ResponseMessage response = new ResponseMessage(requestMessage.getPlayerName(), null);
+                    response.sendToServer(addressedPluginMessage.getSender().getName());
+                    return;
+                }
+
                 plugin.getCachedUUIDFetcher().fetchNameAsync(uuid, name -> {
                     ResponseMessage response = new ResponseMessage(name, uuid);
-                    response.send(addressedPluginMessage.getSender().getName());
+                    response.sendToServer(addressedPluginMessage.getSender().getName());
                 });
             });
         } else if (message.getType().equals(NameRequestMessage.TYPE)) {
@@ -45,7 +53,7 @@ public class BungeeMessageListener implements MessageListener {
 
             plugin.getCachedUUIDFetcher().fetchNameAsync(requestMessage.getUuid(), name -> {
                 ResponseMessage response = new ResponseMessage(name, requestMessage.getUuid());
-                response.send(addressedPluginMessage.getSender().getName());
+                response.sendToServer(addressedPluginMessage.getSender().getName());
             });
         } else if (message.getType().equals(ConnectMessage.TYPE)) {
             ConnectMessage connectMessage = new ConnectMessage(message);
@@ -55,6 +63,15 @@ public class BungeeMessageListener implements MessageListener {
 
             if (player != null && server != null) {
                 player.connect(server);
+            }
+        } else if(message.getType().equals(RunCommandMessage.TYPE)) {
+            RunCommandMessage runCommandMessage = new RunCommandMessage(message);
+
+            ProxiedPlayer player = ProxyServer.getInstance().getPlayer(runCommandMessage.getPlayerName());
+            String command = runCommandMessage.getCommand();
+
+            if (player != null) {
+                ProxyServer.getInstance().getPluginManager().dispatchCommand(player, command);
             }
         }
     }
