@@ -94,12 +94,12 @@ public class TimedHashMap<K, V> implements Map<K, V> {
         boolean removedItem = false;
 
         Iterator<K> iterator = entries.keySet().iterator();
-
         while (iterator.hasNext()) {
             K key = iterator.next();
 
             if (isExpired(key)) {
-                this.remove(key);
+                timestamps.remove(key);
+                iterator.remove();
                 removedItem = true;
             }
         }
