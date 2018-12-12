@@ -3,4 +3,4 @@ version: 1.0
 name: UUIDFetcher
 main: de.pauhull.uuidfetcher.bungee.UUIDFetcherBungeePlugin
 
-depends: [TimoCloud]2
+depend: [TimoCloud]
