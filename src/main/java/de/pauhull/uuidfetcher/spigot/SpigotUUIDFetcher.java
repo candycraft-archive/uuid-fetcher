@@ -7,8 +7,8 @@ import cloud.timo.TimoCloud.api.messages.objects.PluginMessage;
 import de.pauhull.uuidfetcher.common.communication.message.NameRequestMessage;
 import de.pauhull.uuidfetcher.common.communication.message.ResponseMessage;
 import de.pauhull.uuidfetcher.common.communication.message.UUIDRequestMessage;
+import de.pauhull.uuidfetcher.common.fetcher.Profile;
 import de.pauhull.uuidfetcher.common.fetcher.UUIDFetcher;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -88,15 +88,13 @@ public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
     @Deprecated
     @Override
     public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
-        fetchProfileAsync(uuid, profile -> consumer.accept(profile.getName()));
+        fetchProfileAsync(uuid, profile -> consumer.accept(profile.getPlayerName()));
     }
 
     @Deprecated
     @Override
     public void getNameCaseSensitive(String name, Consumer<String> consumer) {
-        fetchProfileAsync(name, profile -> {
-            consumer.accept(profile.getName());
-        });
+        fetchProfileAsync(name, profile -> consumer.accept(profile.getPlayerName()));
     }
 
     @Override
@@ -127,17 +125,6 @@ public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
             }
 
         }
-    }
-
-    @AllArgsConstructor
-    public class Profile {
-
-        @Getter
-        private String name;
-
-        @Getter
-        private UUID uuid;
-
     }
 
 }

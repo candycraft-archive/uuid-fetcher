@@ -29,13 +29,13 @@ public class CachedUUIDFetcher implements UUIDFetcher {
     }
 
     @Override
-    public void fetchUUIDAsync(String playerName, Consumer<UUID> consumer) {
+    public void fetchProfileAsync(String playerName, Consumer<Profile> consumer) {
 
         executor.execute(() -> {
 
             UUID uuid = cache.getUUID(playerName);
             if (uuid != null) {
-                consumer.accept(uuid);
+                consumer.accept(new Profile(playerName, uuid));
                 return;
             }
 
@@ -65,7 +65,7 @@ public class CachedUUIDFetcher implements UUIDFetcher {
                 // Return UUID
                 UUID result = UUIDFetcher.parseUUIDFromString(uuidAsString);
                 cache.save(result, retrievedName);
-                consumer.accept(result);
+                consumer.accept(new Profile(retrievedName, result));
             } catch (IOException e) {
                 e.printStackTrace();
                 consumer.accept(null);
@@ -74,13 +74,13 @@ public class CachedUUIDFetcher implements UUIDFetcher {
     }
 
     @Override
-    public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
+    public void fetchProfileAsync(UUID uuid, Consumer<Profile> consumer) {
 
         executor.execute(() -> {
 
             String playerName = cache.getName(uuid);
             if (playerName != null) {
-                consumer.accept(playerName);
+                consumer.accept(new Profile(playerName, uuid));
                 return;
             }
 
@@ -108,7 +108,7 @@ public class CachedUUIDFetcher implements UUIDFetcher {
 
                 String result = object.get("name").getAsString();
                 cache.save(uuid, result);
-                consumer.accept(result);
+                consumer.accept(new Profile(result, uuid));
             } catch (IOException e) {
                 e.printStackTrace();
                 consumer.accept(null);
@@ -116,6 +116,19 @@ public class CachedUUIDFetcher implements UUIDFetcher {
         });
     }
 
+    @Deprecated
+    @Override
+    public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
+        fetchProfileAsync(uuid, profile -> consumer.accept(profile.getPlayerName()));
+    }
+
+    @Deprecated
+    @Override
+    public void fetchUUIDAsync(String playerName, Consumer<UUID> consumer) {
+        fetchProfileAsync(playerName, profile -> consumer.accept(profile.getUuid()));
+    }
+
+    @Deprecated
     @Override
     public void getNameCaseSensitive(String name, Consumer<String> consumer) {
 

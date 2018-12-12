@@ -9,8 +9,6 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Created by Paul
  * on 26.11.2018
@@ -35,24 +33,22 @@ public class BungeeMessageListener implements MessageListener {
         if (message.getType().equals(UUIDRequestMessage.TYPE)) {
             UUIDRequestMessage requestMessage = new UUIDRequestMessage(message);
 
-            plugin.getCachedUUIDFetcher().fetchUUIDAsync(requestMessage.getPlayerName(), uuid -> {
+            plugin.getCachedUUIDFetcher().fetchProfileAsync(requestMessage.getPlayerName(), profile -> {
 
-                if(uuid == null) {
+                if (profile.getUuid() == null) {
                     ResponseMessage response = new ResponseMessage(requestMessage.getPlayerName(), null);
                     response.sendToServer(addressedPluginMessage.getSender().getName());
                     return;
                 }
 
-                plugin.getCachedUUIDFetcher().fetchNameAsync(uuid, name -> {
-                    ResponseMessage response = new ResponseMessage(name, uuid);
-                    response.sendToServer(addressedPluginMessage.getSender().getName());
-                });
+                ResponseMessage response = new ResponseMessage(profile.getPlayerName(), profile.getUuid());
+                response.sendToServer(addressedPluginMessage.getSender().getName());
             });
         } else if (message.getType().equals(NameRequestMessage.TYPE)) {
             NameRequestMessage requestMessage = new NameRequestMessage(message);
 
-            plugin.getCachedUUIDFetcher().fetchNameAsync(requestMessage.getUuid(), name -> {
-                ResponseMessage response = new ResponseMessage(name, requestMessage.getUuid());
+            plugin.getCachedUUIDFetcher().fetchProfileAsync(requestMessage.getUuid(), profile -> {
+                ResponseMessage response = new ResponseMessage(profile.getPlayerName(), requestMessage.getUuid());
                 response.sendToServer(addressedPluginMessage.getSender().getName());
             });
         } else if (message.getType().equals(ConnectMessage.TYPE)) {
