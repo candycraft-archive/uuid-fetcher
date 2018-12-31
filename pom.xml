@@ -129,4 +129,18 @@
         </plugins>
     </build>
 
+    <properties>
+        <archiva.URL>http://116.203.16.116:8080</archiva.URL>
+    </properties>
+
+    <distributionManagement>
+
+        <repository>
+            <id>novusmc-repo</id>
+            <name>release</name>
+            <url>${archiva.URL}/repository/internal</url>
+        </repository>
+
+    </distributionManagement>
+
 </project>

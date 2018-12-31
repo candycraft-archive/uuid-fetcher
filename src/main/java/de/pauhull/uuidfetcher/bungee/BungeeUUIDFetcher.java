@@ -1,12 +1,11 @@
 package de.pauhull.uuidfetcher.bungee;
 
 import de.pauhull.uuidfetcher.common.fetcher.CachedUUIDFetcher;
-import de.pauhull.uuidfetcher.common.fetcher.Profile;
-import de.pauhull.uuidfetcher.common.fetcher.UUIDFetcher;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -15,48 +14,47 @@ import java.util.function.Consumer;
  *
  * @author pauhull
  */
-public class BungeeUUIDFetcher implements UUIDFetcher {
+public class BungeeUUIDFetcher {
 
     private static UUIDFetcherBungeePlugin plugin = UUIDFetcherBungeePlugin.getInstance();
 
-    @Override
-    public void fetchProfileAsync(UUID uuid, Consumer<Profile> consumer) {
+    public void fetchProfileAsync(UUID uuid, BiConsumer<String, UUID> consumer) {
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid);
         if (player != null) {
             CachedUUIDFetcher.getCache().save(player.getUniqueId(), player.getName());
-            consumer.accept(new Profile(player.getName(), player.getUniqueId()));
+            consumer.accept(player.getName(), player.getUniqueId());
             return;
         }
 
-        plugin.getCachedUUIDFetcher().fetchProfileAsync(uuid, consumer);
+        plugin.getCachedUUIDFetcher().fetchProfileAsync(uuid, profile -> {
+            consumer.accept(profile.getPlayerName(), profile.getUuid());
+        });
     }
 
-    @Override
-    public void fetchProfileAsync(String playerName, Consumer<Profile> consumer) {
+    public void fetchProfileAsync(String playerName, BiConsumer<String, UUID> consumer) {
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerName);
         if (player != null) {
             CachedUUIDFetcher.getCache().save(player.getUniqueId(), player.getName());
-            consumer.accept(new Profile(player.getName(), player.getUniqueId()));
+            consumer.accept(player.getName(), player.getUniqueId());
             return;
         }
 
-        plugin.getCachedUUIDFetcher().fetchProfileAsync(playerName, consumer);
+        plugin.getCachedUUIDFetcher().fetchProfileAsync(playerName, profile -> {
+            consumer.accept(profile.getPlayerName(), profile.getUuid());
+        });
     }
 
     @Deprecated
-    @Override
     public void fetchUUIDAsync(String playerName, Consumer<UUID> consumer) {
-        fetchProfileAsync(playerName, profile -> consumer.accept(profile.getUuid()));
+        fetchProfileAsync(playerName, (ignored, uuid) -> consumer.accept(uuid));
     }
 
     @Deprecated
-    @Override
     public void fetchNameAsync(UUID uuid, Consumer<String> consumer) {
-        fetchProfileAsync(uuid, profile -> consumer.accept(profile.getPlayerName()));
+        fetchProfileAsync(uuid, (name, ignored) -> consumer.accept(name));
     }
 
     @Deprecated
-    @Override
     public void getNameCaseSensitive(String name, Consumer<String> consumer) {
         fetchUUIDAsync(name, uuid -> fetchNameAsync(uuid, consumer));
     }

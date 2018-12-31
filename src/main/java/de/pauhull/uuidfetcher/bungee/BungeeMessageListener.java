@@ -35,7 +35,7 @@ public class BungeeMessageListener implements MessageListener {
 
             plugin.getCachedUUIDFetcher().fetchProfileAsync(requestMessage.getPlayerName(), profile -> {
 
-                if (profile.getUuid() == null) {
+                if (profile == null || profile.getUuid() == null) {
                     ResponseMessage response = new ResponseMessage(requestMessage.getPlayerName(), null);
                     response.sendToServer(addressedPluginMessage.getSender().getName());
                     return;
