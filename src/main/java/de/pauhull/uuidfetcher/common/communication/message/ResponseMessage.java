@@ -1,6 +1,5 @@
 package de.pauhull.uuidfetcher.common.communication.message;
 
-import cloud.timo.TimoCloud.api.TimoCloudAPI;
 import cloud.timo.TimoCloud.api.messages.objects.PluginMessage;
 import lombok.Getter;
 
@@ -32,8 +31,13 @@ public class ResponseMessage extends CommunicationMessage {
     }
 
     public ResponseMessage(PluginMessage pluginMessage) {
-        this(pluginMessage.getString("playerName"),
-                pluginMessage.getString("uuid") != null ? UUID.fromString(pluginMessage.getString("uuid")) : null);
+        this(pluginMessage.getString("playerName"), fetchUUID(pluginMessage.getString("uuid")));
+    }
+
+    private static UUID fetchUUID(String s) {
+        if (s == null) return null;
+        if (s.equals("null")) return null;
+        return UUID.fromString(s);
     }
 
 }
