@@ -23,10 +23,10 @@ import java.util.function.Consumer;
  *
  * @author pauhull
  */
-public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
+public class SpigotUUIDFetcher extends JavaPlugin implements MessageListener, UUIDFetcher {
 
     @Getter
-    private JavaPlugin plugin;
+    private static SpigotUUIDFetcher instance;
 
     @Getter
     private Map<String, List<Consumer<Profile>>> requestedProfilesByName = new HashMap<>();
@@ -34,9 +34,15 @@ public class SpigotUUIDFetcher implements MessageListener, UUIDFetcher {
     @Getter
     private Map<UUID, List<Consumer<Profile>>> requestedProfilesByUUID = new HashMap<>();
 
-    public SpigotUUIDFetcher(JavaPlugin plugin) {
-        this.plugin = plugin;
+    @Override
+    public void onEnable() {
+        instance = this;
         TimoCloudAPI.getMessageAPI().registerMessageListener(this);
+    }
+
+    @Override
+    public void onDisable() {
+        instance = null;
     }
 
     public void fetchProfileAsync(String playerName, Consumer<Profile> consumer) {

@@ -1,6 +1,5 @@
 package de.pauhull.uuidfetcher.common.communication.message;
 
-import cloud.timo.TimoCloud.api.TimoCloudAPI;
 import cloud.timo.TimoCloud.api.messages.objects.PluginMessage;
 import lombok.Getter;
 
@@ -27,7 +26,13 @@ public class NameRequestMessage extends CommunicationMessage {
     }
 
     public NameRequestMessage(PluginMessage pluginMessage) {
-        this(UUID.fromString(pluginMessage.getString("uuid")));
+        this(fetchUUID(pluginMessage.getString("uuid")));
+    }
+
+    private static UUID fetchUUID(String s) {
+        if (s == null) return null;
+        if (s.equals("null")) return null;
+        return UUID.fromString(s);
     }
 
 }

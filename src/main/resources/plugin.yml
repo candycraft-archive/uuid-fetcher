@@ -1,0 +1,6 @@
+name: SpigotUUIDFetcher
+version: 1.0
+main: de.pauhull.uuidfetcher.spigot.SpigotUUIDFetcher
+author: pauhull
+
+depend: [TimoCloud]
