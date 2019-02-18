@@ -1,5 +1,7 @@
 package de.pauhull.uuidfetcher.common.fetcher;
 
+import cloud.timo.TimoCloud.api.TimoCloudAPI;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -24,11 +26,19 @@ public class UUIDCache {
     }
 
     public UUID getUUID(String name) {
-        return uuidCache.get(name);
+        if (TimoCloudAPI.getUniversalAPI().getPlayer(name) != null) {
+            return TimoCloudAPI.getUniversalAPI().getPlayer(name).getUuid();
+        }else {
+            return uuidCache.get(name);
+        }
     }
 
     public String getName(UUID uuid) {
-        return nameCache.get(uuid);
+        if (TimoCloudAPI.getUniversalAPI().getPlayer(uuid) != null) {
+            return TimoCloudAPI.getUniversalAPI().getPlayer(uuid).getName();
+        }else {
+            return nameCache.get(uuid);
+        }
     }
 
 }
