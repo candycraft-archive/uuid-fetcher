@@ -1,6 +1,12 @@
 ## Installation
-Clone and install this repo, then add this dependency:
+Add this dependency:
 ```
+<!-- CandyCraft repo -->
+<repository>
+    <id>candycraft-repo</id>
+    <url>https://repo.morx.me</url>
+</repository>
+
 <!-- Proxy UUID-Fetcher -->
 <dependency>
     <groupId>de.pauhull</groupId>
