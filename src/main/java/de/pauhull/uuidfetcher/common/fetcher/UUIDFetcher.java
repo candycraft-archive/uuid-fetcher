@@ -37,13 +37,10 @@ public interface UUIDFetcher {
 
     void fetchProfileAsync(UUID uuid, Consumer<Profile> consumer);
 
-    @Deprecated
     void fetchUUIDAsync(String playerName, Consumer<UUID> consumer);
 
-    @Deprecated
     void fetchNameAsync(UUID uuid, Consumer<String> consumer);
 
-    @Deprecated
     void getNameCaseSensitive(String name, Consumer<String> consumer);
 
 }

@@ -29,7 +29,11 @@ public class UUIDCache {
         if (TimoCloudAPI.getUniversalAPI().getPlayer(name) != null) {
             return TimoCloudAPI.getUniversalAPI().getPlayer(name).getUuid();
         }else {
-            return uuidCache.get(name);
+            if (uuidCache.containsKey(name)) {
+                return uuidCache.get(name);
+            }else {
+                return null;
+            }
         }
     }
 
@@ -37,7 +41,12 @@ public class UUIDCache {
         if (TimoCloudAPI.getUniversalAPI().getPlayer(uuid) != null) {
             return TimoCloudAPI.getUniversalAPI().getPlayer(uuid).getName();
         }else {
-            return nameCache.get(uuid);
+            if (nameCache.containsKey(uuid)) {
+                return nameCache.get(uuid);
+            }else {
+                return null;
+            }
+
         }
     }
 

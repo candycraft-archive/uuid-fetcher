@@ -46,7 +46,7 @@ public class CachedUUIDFetcher implements UUIDFetcher {
                 connection.connect();
 
                 if (connection.getResponseCode() != 200) {
-                    consumer.accept(null);
+                    consumer.accept(new Profile(null, null));
                     return;
                 }
 
@@ -91,7 +91,7 @@ public class CachedUUIDFetcher implements UUIDFetcher {
                 connection.connect();
 
                 if (connection.getResponseCode() != 200) {
-                    consumer.accept(null);
+                    consumer.accept(new Profile(null, null));
                     return;
                 }
 
